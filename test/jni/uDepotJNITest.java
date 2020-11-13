@@ -155,9 +155,9 @@ class uDepotJNITest {
 		String uDepot_fname = argv[0];
 
 		String[] machines = new String[0];
-		final long read_nr =100000;
-		final long write_nr=100000;
-		final long size = (1048576L*1024L+4096L)*5L;
+		final long read_nr =50000;
+		final long write_nr=50000;
+		final long size = (524288L*1024L+4096L);
 		System.out.println("Test with size =" + (size >> 20) + "MiB");
 		uDepotJNITest udpt = new uDepotJNITest(uDepot_fname, size, true);
 		System.out.println("udpt size =" + (udpt.getRawDeviceCapacity() >> 20) + "MiB");
