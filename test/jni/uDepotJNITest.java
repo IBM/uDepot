@@ -181,7 +181,7 @@ class uDepotJNITest {
 
 		udpt.shutdown();
 		// restore
-		uDepotJNITests udpt2 = new uDepotJNITest(uDepot_fname, size, false);
+		uDepotJNITest udpt2 = new uDepotJNITest(uDepot_fname, size, false);
 		before = System.nanoTime();
 		rc = udpt2.get_test_thin(0, write_nr);
 		after = System.nanoTime();
