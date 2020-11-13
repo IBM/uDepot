@@ -1,0 +1,27 @@
+dist: bionic
+language: cpp
+compiler: gcc
+#sudo: required
+
+addons:
+  apt:
+    packages:
+     - build-essential
+     - default-jdk
+     - libboost-dev
+     - zlib1g-dbg
+     - libgoogle-perftools-dev
+     - systemtap-sdt-dev
+
+script:
+ - make
+ - make run_tests
+ - make run_trt_tests
+
+notifications:
+  email:
+    recipients:
+      - nio@zurich.ibm.com
+      - ddi@zurich.ibm.com
+    on_success: never # default: change
+    on_failure: always # default: always

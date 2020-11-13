@@ -1,0 +1,27 @@
+GPATH
+GRTAGS
+GTAGS
+GSYMS
+.*swp
+.ycm_extra_conf.pyc
+trt/build
+bin
+core
+*~
+*.o
+*.d
+*.gch
+.*sw*
+# python bytecode fiels
+*.pyc
+libudepot.a
+perf.data
+perf.data.old
+cscope.out
+test/uDepot/udepot-utests
+test/jni/uDepotJNITest.class
+test/uDepot/memcache/udepot-memcache-server
+test/uDepot/memcache/udepot-memcache-test
+test/uDeopt/udepot-test
+test/uDeopt/udepot-trt-test
+test/uDepot/udepot-net-ubench

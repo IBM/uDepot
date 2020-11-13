@@ -1,0 +1,5 @@
+classes
+.deps
+com_ibm_udepot_uDepotJNI.h
+*.o
+*.so

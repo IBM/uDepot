@@ -1,0 +1,9 @@
+[submodule "external/cityhash"]
+	path = external/cityhash
+	url = https://github.com/google/cityhash.git
+[submodule "trt/external/spdk"]
+	path = trt/external/spdk
+	url = https://github.com/spdk/spdk.git
+[submodule "trt/external/dpdk"]
+	path = trt/external/dpdk
+	url = git://dpdk.org/dpdk
