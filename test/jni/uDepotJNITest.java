@@ -123,6 +123,7 @@ class uDepotJNITest {
 	public void shutdown() {
 		if (null != KV)
 			KV.shutdown();
+		KV = null;
 	}
 
 	public uDepotJNITest(String fname, long size, boolean force_destroy) throws RuntimeException{
@@ -155,9 +156,9 @@ class uDepotJNITest {
 		String uDepot_fname = argv[0];
 
 		String[] machines = new String[0];
-		final long read_nr =100000;
-		final long write_nr=100000;
-		final long size = (1048576L*1024L+4096L)*5L;
+		final long read_nr =50000;
+		final long write_nr=50000;
+		final long size = (524288L*1024L+4096L);
 		System.out.println("Test with size =" + (size >> 20) + "MiB");
 		uDepotJNITest udpt = new uDepotJNITest(uDepot_fname, size, true);
 		System.out.println("udpt size =" + (udpt.getRawDeviceCapacity() >> 20) + "MiB");
@@ -177,14 +178,6 @@ class uDepotJNITest {
 		System.out.println("get time =" + (after - before)/1e9 + "s");
 
 		System.out.println("KV utilization =" + (udpt.getSize() >> 10) + "KiB");
-
-		udpt.shutdown();
-		// restore
-		udpt = new uDepotJNITest(uDepot_fname, size, false);
-		before = System.nanoTime();
-		rc = udpt.get_test_thin(0, write_nr);
-		after = System.nanoTime();
-		System.out.println("get time =" + (after - before)/1e9 + "s");
 
 		before = System.nanoTime();
 		rc = udpt.del_test_thin(0, write_nr);
