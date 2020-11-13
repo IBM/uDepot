@@ -179,20 +179,12 @@ class uDepotJNITest {
 
 		System.out.println("KV utilization =" + (udpt.getSize() >> 10) + "KiB");
 
-		udpt.shutdown();
-		// restore
-		uDepotJNITest udpt2 = new uDepotJNITest(uDepot_fname, size, false);
 		before = System.nanoTime();
-		rc = udpt2.get_test_thin(0, write_nr);
-		after = System.nanoTime();
-		System.out.println("get time =" + (after - before)/1e9 + "s");
-
-		before = System.nanoTime();
-		rc = udpt2.del_test_thin(0, write_nr);
+		rc = udpt.del_test_thin(0, write_nr);
 		after = System.nanoTime();
 		System.out.println("del time =" + (after - before)/1e9 + "s");
 
-		System.out.println("KV utilization =" + (udpt2.getSize() >> 10) + "KiB");
+		System.out.println("KV utilization =" + (udpt.getSize() >> 10) + "KiB");
 
 	}
 }
