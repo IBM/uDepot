@@ -15,10 +15,8 @@ addons:
 
 script:
  - make
- - rm -f /dev/shm/udepot-test
- - LD_LIBRARY_PATH=src/uDepot/jni:$LD_LIBRARY_PATH java -cp src/uDepot/jni/classes/:test/jni/ uDepotJNITest /dev/shm/udepot-test
-# - make run_tests
-# - make run_trt_tests
+ - make run_tests
+ - make run_trt_tests
 
 notifications:
   email:
