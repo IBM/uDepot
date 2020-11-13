@@ -123,6 +123,7 @@ class uDepotJNITest {
 	public void shutdown() {
 		if (null != KV)
 			KV.shutdown();
+		KV = null;
 	}
 
 	public uDepotJNITest(String fname, long size, boolean force_destroy) throws RuntimeException{
@@ -180,18 +181,18 @@ class uDepotJNITest {
 
 		udpt.shutdown();
 		// restore
-		udpt = new uDepotJNITest(uDepot_fname, size, false);
+		uDepotJNITests udpt2 = new uDepotJNITest(uDepot_fname, size, false);
 		before = System.nanoTime();
-		rc = udpt.get_test_thin(0, write_nr);
+		rc = udpt2.get_test_thin(0, write_nr);
 		after = System.nanoTime();
 		System.out.println("get time =" + (after - before)/1e9 + "s");
 
 		before = System.nanoTime();
-		rc = udpt.del_test_thin(0, write_nr);
+		rc = udpt2.del_test_thin(0, write_nr);
 		after = System.nanoTime();
 		System.out.println("del time =" + (after - before)/1e9 + "s");
 
-		System.out.println("KV utilization =" + (udpt.getSize() >> 10) + "KiB");
+		System.out.println("KV utilization =" + (udpt2.getSize() >> 10) + "KiB");
 
 	}
 }

@@ -113,6 +113,7 @@ out0:
 	pthread_mutex_unlock(&kv_mtx_g);
 	return err;
 fail1:
+	delete KV;
 fail0:
 	KV = nullptr;
 	pthread_mutex_unlock(&kv_mtx_g);
