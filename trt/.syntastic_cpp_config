@@ -1,0 +1,9 @@
+-Wall
+-Wextra
+-Wno-unused-parameter
+-Wshadow
+-Iinclude
+-std=c++11
+-Isrc
+-Iexternal/dpdk/include/dpdk
+-Iexternal/spdk/include

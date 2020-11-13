@@ -1,0 +1,13 @@
+diff --git a/mk/spdk.common.mk b/mk/spdk.common.mk
+index 20721228..5e9ed57b 100644
+--- a/scripts/setup.sh
++++ b/scripts/setup.sh
+@@ -206,7 +206,7 @@ function reset_freebsd {
+ 	kldunload nic_uio.ko || true
+ }
+ 
+-: ${NRHUGE:=1024}
++: ${NRHUGE:=16384}
+ 
+ username=$1
+ mode=$2
