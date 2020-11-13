@@ -152,7 +152,7 @@ JNI test in `test/jni/uDepotJNITest.java`.
 ## Notes
 
 - Crash recovery: Data should be always recoverable from the uDepot
-  data log when using a block device that is "enterprize" grade and
+  data log when using a block device that is "enterprise" grade and
   has battery (or otherwise) protected data buffers), i.e., a REQ_FUA
   (e.g., for writes on fds opened with O_SYNC) will return
   immediately. Most datacenter-grade NVMe drives offer this.
