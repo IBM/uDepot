@@ -7,3 +7,6 @@
 [submodule "trt/external/dpdk"]
 	path = trt/external/dpdk
 	url = git://dpdk.org/dpdk
+[submodule "trt/external/liburing"]
+	path = trt/external/liburing
+	url = https://github.com/axboe/liburing/
