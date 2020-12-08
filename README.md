@@ -130,8 +130,7 @@ val=b'Val\xDE\xAD\xBE\xEF'
 vnp=np.frombuffer(val, dtype=np.uint8)
 kv_params={}
 
-kv_params['file_name']='/dev/shm/udepot-test'
-kv_params['size'] = 1024*1024
+kv_params['file_name']='/dev/nvme0n1'
 kv=uDepot(**kv_params)
 
 ret = kv.put(knp, vnp)
