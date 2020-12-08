@@ -110,6 +110,33 @@ BUILD_SPDK=1 make
 Notes: Add src/include to the list of directories searched for header
 files, and link your external application against libudepot.a
 
+## Python API usage
+
+Python API uses keys and values provided as numpy arrays
+
+Build libpyudepot.so
+```
+make python/pyudepot/libpyudepot.so
+```
+
+```
+from pyudepot import uDepot
+import numpy as np
+
+key=b'Key1\xff'
+knp=np.frombuffer(key, dtype=np.uint8)
+val=b'Val\xDE\xAD\xBE\xEF'
+vnp=np.frombuffer(val, dtype=np.uint8)
+kv_params={}
+
+kv_params['file_name']='/dev/shm/udepot-test'
+kv_params['size'] = 1024*1024
+kv=uDepot(**kv_params)
+
+ret = kv.put(knp, vnp)
+val_out=np.empty(vnp.size,dtype=np.uint8)
+ret = kv.get(knp, val_out)
+```
 
 ## Java JNI API usage
 
