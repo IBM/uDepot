@@ -130,6 +130,7 @@ TESTS = bin/udepot-test             \
 MC_SERVER = bin/udepot-memcache-server
 MC_TEST = test/uDepot/memcache/udepot-memcache-test
 LIBUDEPOT = libudepot.a
+LIBPYUDEPOT = python/pyudepot/libpyudepot.so
 
 ifeq (1, $(BUILD_SPDK))
       CXXFLAGS  += -DUDEPOT_TRT_SPDK
@@ -249,6 +250,7 @@ udepot_all_SRC = $(udepot_SRC)                     \
                  test/uDepot/io-helpers.cc         \
                  src/uDepot/lsa/udepot-dir-map-or.cc \
                  test/uDepot/uDepotDirMapORTest.cc \
+                 python/wrapper/pyudepot.cc \
 
 udepot_all_DEP = $(patsubst %.cc, .deps/%.d, ${udepot_all_SRC})
 
@@ -284,6 +286,12 @@ test/uDepot/Mbuff-test: src/uDepot/mbuff.cc src/include/uDepot/mbuff.hh ./src/in
 
 test/misc/inline_cache: test/misc/inline_cache.cc
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@
+
+# uDepot python
+
+$(LIBPYUDEPOT): $(udepot_OBJ) $(LIBUSALSA_OBJ) $(LIBTRT_OBJ) $(LIBCITYHASH_LIB) python/wrapper/pyudepot.o python/wrapper/pyudepot.hh
+	$(CXX) -shared -Wl,-soname,$@ $(udepot_OBJ) $(LIBUSALSA_OBJ) $(LIBTRT_OBJ) python/wrapper/pyudepot.o $(LIBS) -o $@
+	strip --strip-debug $@
 
 #
 # uDepot JNI
@@ -393,6 +401,9 @@ run_trt_tests: $(TESTS)
 	@$(call do_run_test,bin/udepot-test -u 5 -f /tmp/udepot-test-XXXX -w 1000 -r 1000 -t 1 --del --grain-size 512)
 	rm -f /tmp/udepot-test-XXXX
 
+run_pyudepot_test: python/test-pyudepot.py $(LIBPYUDEPOT)
+	@$(call do_run_test, LD_LIBRARY_PATH=python/pyudepot/:$$LD_LIBRARY_PATH PYTHONPATH=python/:$PYTHONPATH python3 python/test-pyudepot.py)
+
 %.o: %.cc Makefile
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -409,6 +420,7 @@ lclean:
 	rm -rf $(JNI_CLASSDIR)
 	rm  -f $(uDepotJNI_C_HEADER)
 	rm  -f $(LIBUDEPOT)
+	rm  -f $(LIBPYUDEPOT)
 	rm  -f $(udepot_all_DEP)
 	rm  -f $(udepot_net_ubench_OBJ)
 	rm  -f scripts/docker/udepot-memcache-server
@@ -416,6 +428,7 @@ lclean:
 	rm  -f src/uDepot/lsa/udepot-dir-map-or.o
 	rm  -f test/uDepot/io-helpers.o
 	rm  -f test/uDepot/uDepotDirMapORTest test/uDepot/uDepotDirMapORTest.o
+	rm  -f python/wrapper/pyudepot.o
 	make -C $(TRT_DIR) clean;
 
 clean: lclean

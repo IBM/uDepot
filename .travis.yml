@@ -17,6 +17,8 @@ script:
  - make
  - make run_tests
  - make run_trt_tests
+ - make python/pyudepot/libpyudepot.so
+ - make run_pyudepot_test
 
 notifications:
   email:
