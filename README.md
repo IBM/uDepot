@@ -119,6 +119,7 @@ Build libpyudepot.so
 make python/pyudepot/libpyudepot.so
 ```
 
+Minimal usage example:
 ```
 from pyudepot import uDepot
 import numpy as np

@@ -402,7 +402,7 @@ run_trt_tests: $(TESTS)
 	rm -f /tmp/udepot-test-XXXX
 
 run_pyudepot_test: python/test-pyudepot.py $(LIBPYUDEPOT)
-	@$(call do_run_test, LD_LIBRARY_PATH=python/pyudepot/:$$LD_LIBRARY_PATH PYTHONPATH=python/:$PYTHONPATH python3 python/test-pyudepot.py)
+	@$(call do_run_test, LD_LIBRARY_PATH=python/pyudepot/:$$LD_LIBRARY_PATH PYTHONPATH=python/:$$PYTHONPATH python3 python/test-pyudepot.py)
 
 %.o: %.cc Makefile
 	$(CXX) $(CXXFLAGS) -c $< -o $@
