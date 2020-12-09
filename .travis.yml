@@ -12,11 +12,16 @@ addons:
      - zlib1g-dbg
      - libgoogle-perftools-dev
      - systemtap-sdt-dev
+     - python3
+     - python3-pip
 
 script:
  - make
  - make run_tests
  - make run_trt_tests
+ - make python/pyudepot/libpyudepot.so
+ - pip3 install numpy
+ - make run_pyudepot_test
 
 notifications:
   email:
