@@ -61,7 +61,8 @@ uDepotDirectoryMap<RT>::uDepotDirectoryMap(uDepotSalsaMD<RT> &md, typename RT::I
 	type_m(uDepotSalsaType::Directory),
 	udepot_io_m(udepot_io),
 	md_m(md),
-	grow_nr_m(0)
+	grow_nr_m(0),
+	map_entry_nr_bits_m(0)
 {
 	dir_ref_m.directory = new std::vector<DirMapEntry> (0);
 }
@@ -134,6 +135,11 @@ uDepotDirectoryMap<RT>::init(salsa::Scm *const scm, uDepotSalsa<RT> *const udpt)
 		}
 	}
 
+	{
+		std::vector<DirMapEntry> *const directory = dir_ref_m.directory.load(std::memory_order_relaxed);
+		const uDepotMap<RT> &map = ((*directory)[0]).map;
+		map_entry_nr_bits_m = map.entry_nr_bits_m;
+	}
 	return 0;
 fail2:
 	salsa::SalsaCtlr::shutdown();
@@ -243,7 +249,7 @@ uDepotDirectoryMap<RT>::grow()
 				if (!p->used())
 					continue;
 				const u64 h = map.entry_keyfp(p);
-				const u32 idx = h % new_size;
+				const u32 idx = hash_to_dir_idx_(h, grow_nr_m);
 				HashEntry *trgt = nullptr;
 				int rc = trgts[idx]->lookup(h, &trgt);
 				switch (rc) {
@@ -284,7 +290,7 @@ uDepotDirectoryMap<RT>::grow()
 			if (!p->used())
 				continue;
 			const u64 h = map.entry_keyfp(p);
-			const u32 idx = h % new_size;
+			const u32 idx = hash_to_dir_idx_(h, grow_nr_m);
 			assert(nullptr != (*new_dir)[idx].map.lookup(h, p->pba));
 		}
 	}

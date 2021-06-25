@@ -16,6 +16,7 @@
 #ifndef JCTX_H__
 #define JCTX_H__
 
+/* #include <setjmp.h> */
 #include <stdlib.h>
 
 // an array of 5  words is needed according to gcc/builtins.c
@@ -23,6 +24,7 @@ struct jctx {
 	void *stk;
 	unsigned long stk_size;
 	void *ctx_[5];
+	/* jmp_buf buf_; */
 };
 typedef struct jctx jctx_t;
 
@@ -54,6 +56,8 @@ jctx_longjmp(struct jctx *jctx)
 
 #define jctx_setjmp(x)  __builtin_setjmp(&(x)->ctx_)
 #define jctx_longjmp(x) __builtin_longjmp(&(x)->ctx_, 1) // XXX: This is actually unsafe with newer GCC versions!
+/* #define jctx_setjmp(x)  setjmp((x)->buf_) */
+/* #define jctx_longjmp(x) longjmp((x)->buf_, 1) */
 
 void jctx_switch(jctx_t *from, jctx_t *to);
 void jctx_jump(jctx_t *to);
