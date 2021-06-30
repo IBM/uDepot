@@ -200,7 +200,7 @@ u64 KV_conf::sanitize_segment_size(u64 grain_size, u64 segment_size)
 	segment_size = align_down(segment_size, step_size);
 	segment_size = std::max(1UL, segment_size);
 	if (old != segment_size)
-		UDEPOT_MSG("segment size sanitized from %lu to %lu\n", old, segment_size);
+		UDEPOT_DBG("segment size sanitized from %lu to %lu\n", old, segment_size);
 	return segment_size;
 }
 

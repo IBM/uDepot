@@ -113,16 +113,24 @@ public:
 	};
 	DirMapRef dir_ref_m;
 
+	u64 hash_to_dir_idx_(const u64 h, const u32 dir_idx_bits) const {
+		assert(dir_idx_bits < UDEPOT_SALSA_KEYTAG_BITS + map_entry_nr_bits_m);
+		const u64 hh = (h & ((1UL << (UDEPOT_SALSA_KEYTAG_BITS + map_entry_nr_bits_m)) - 1UL));
+		return (hh) >> (UDEPOT_SALSA_KEYTAG_BITS + map_entry_nr_bits_m - dir_idx_bits);
+	}
+
 	uDepotMap<RT> *hash_to_map(const u64 h) {
 		std::vector<DirMapEntry> *const directory = dir_ref_m.directory.load(std::memory_order_relaxed);
 		assert(nullptr != directory);
-		return &((*directory)[h % directory->size()]).map;
+		const u64 idx = hash_to_dir_idx_(h, grow_nr_m - 1);
+		return &((*directory)[idx]).map;
 	}
 private:
 	const uDepotSalsaType type_m;
 	typename RT::IO       &udepot_io_m;
 	uDepotSalsaMD<RT>     &md_m;
 	u32                   grow_nr_m;
+	u32                   map_entry_nr_bits_m;
 	typename RT::LockTy   grow_lock_m;
 	int restore(salsa::Scm *scm, uDepotSalsa<RT> *udpt);
 	int prep_crash_recovery(salsa::Scm *scm, uDepotSalsa<RT> *udpt);
