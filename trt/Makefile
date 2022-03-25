@@ -230,7 +230,7 @@ build_spdk:
 	cd external/spdk && ./configure --with-dpdk=../dpdk/dpdk && make -j10
 
 build_uring:
-	cd external/liburing && EXTRA_CFLAGS="-fPIC" make
+	cd external/liburing && CFLAGS="-fpic -fPIC" CPPFLAGS="-fpic -fPIC" LINK_FLAGS="-fpic -fPIC" make
 
 $(build_DIR)/%.o: $(src_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) -c  $< -o $@
@@ -315,3 +315,6 @@ clean:
 	rm -f $(jctx_TESTS)
 	rm -f $(trt_spdk_TESTS)
 	rm -f $(trt_rdma_TESTS)
+	cd external/liburing && make clean && cd -
+
+
