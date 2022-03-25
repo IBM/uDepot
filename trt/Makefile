@@ -3,6 +3,7 @@
 BUILD_SPDK   ?= 0
 BUILD_RDMA   ?= 0
 BUILD_PIC    ?= 1
+BUILD_URING  ?= 1
 USE_TCMALLOC ?= 0
 BUILD_SDT    ?= 0 # tracing
 BUILD_TYPE   ?= NORMAL
@@ -50,6 +51,11 @@ ifeq (1, $(BUILD_RDMA))
       LDFLAGS += -libverbs -lrdmacm
 endif
 
+ifeq (1, $(BUILD_URING))
+	CXXFLAGS += -D_GNU_SOURCE -Iexternal/liburing/src/include
+	LDFLAGS += -Lexternal/liburing/src -luring
+endif
+
 build_DIR = $(BUILD_DIR)
 src_DIR   = src
 
@@ -91,6 +97,10 @@ trt_backends_SRC =                     \
  $(src_DIR)/trt_backends/trt_aio.cc        \
  $(src_DIR)/trt_backends/trt_epoll.cc      \
 
+ifeq (1, $(BUILD_URING))
+      trt_backends_SRC   +=  $(src_DIR)/trt_backends/trt_iou.cc
+endif
+
 jctx_TESTS =                  \
  $(jctx_build_DIR)/jctx-test-simple \
  $(jctx_build_DIR)/jctx-test-setjmp \
@@ -116,6 +126,14 @@ trt_TESTS = \
   $(build_DIR)/benchs/aio_bench                       \
   $(build_DIR)/benchs/trt_aio_bench                   \
   $(build_DIR)/benchs/trt_ubench                      \
+
+trt_uring_TESTS = \
+  $(build_DIR)/tests/uring_test                        \
+  $(build_DIR)/benchs/trt_iou_bench                        \
+
+ifeq (1, $(BUILD_URING))
+      trt_TESTS   += $(trt_uring_TESTS)
+endif
 
 trt_spdk_TESTS = \
   $(build_DIR)/tests/spdk_test                        \

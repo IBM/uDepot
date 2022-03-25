@@ -1,11 +1,11 @@
 /*
- *  Copyright (c) 2020 International Business Machines
+ *  Copyright (c) 2020,2022 International Business Machines
  *  All rights reserved.
  *
  *  SPDX-License-Identifier: BSD-3-Clause
  *
  *  Authors: Kornilios Kourtis (kou@zurich.ibm.com, kornilios@gmail.com)
- *
+ *           Nikolas Ioannou (nio@zurich.ibm.com, nicioan@gmail.com)
  */
 
 // vim: set expandtab softtabstop=4 tabstop=4 shiftwidth=4:
@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "trt/local_single_sync.hh"
-#include "trt_util/aio.hh"
+#include "trt_util/iouring.hh"
 
 namespace trt {
 
@@ -35,14 +35,17 @@ public:
   IouOp(const IouOp&) = delete;
   IouOp& operator=(const IouOp&) = delete;
   IouOp(IouOp &&op) = delete;
-  IouOp() : iou_lsaobj_(), iou_state_(State::INVALID), op_code_(IouOpCode::INVALID) {}
-  IouOp(uint16_t op, int fd, struct iovec *iov, int iovcnt, off_t off) : IouOp(), fd_(fd), iovec_(iov), iovec_cnt_(iovcnt), offset_(off) {
-    switch(op) {
-    case IOCB_CMD_PREADV:
-      op_code_ = PREADV;
-      break;
-    case IOCB_CMD_WRITEV:
-      op_code_ = PWRITEV;
+
+  enum State { INVALID, INITIALIZED, IO_SUBMITTED, IO_ERROR, IO_DONE, };
+  enum IouOpCode { INVALID_OP, PREADV, PWRITEV };
+
+  IouOp() : iou_lsaobj_(), state_(State::INVALID), op_code_(IouOpCode::INVALID_OP) {}
+  IouOp(IouOpCode op, int fd, struct iovec *iov, int iovcnt, off_t off)
+    : iou_lsaobj_(), state_(State::INITIALIZED),
+      op_code_(op), fd_(fd), iovec_(iov), iovec_cnt_(iovcnt), offset_(off) {
+    switch(op_code_) {
+    case IouOpCode::PREADV:
+    case IouOpCode::PWRITEV:
       break;
     default:
       fprintf(stderr, "invalid IOU OP Code=(%d)\n", op);
@@ -53,23 +56,23 @@ public:
   ~IouOp() {
     // I cannot think any legit case where this happens since the poller
     // will hold a reference to this op.
-    if (iou_state_ == State::IO_SUBMITTED) {
+    if (state_ == State::IO_SUBMITTED) {
       fprintf(stderr, "[%s +%d] ***** destructor (%s) called while state being IO_SUBMITTED\n", __FILE__, __LINE__, __FUNCTION__);
       abort();
     }
   };
 
-  bool is_invalid() { return iou_state_ == State::INVALID; }
-  bool is_initialized() { return iou_state_ == State::INITIALIZED; }
-  bool is_io_submitted() { return iou_state_ == State::IO_SUBMITTED; }
-  bool is_io_done() { return iou_state_ == State::IO_DONE; }
-  bool is_in_error() { return iou_state_ == State::IO_ERROR; }
+  bool is_invalid() { return state_ == State::INVALID; }
+  bool is_initialized() { return state_ == State::INITIALIZED; }
+  bool is_io_submitted() { return state_ == State::IO_SUBMITTED; }
+  bool is_io_done() { return state_ == State::IO_DONE; }
+  bool is_in_error() { return state_ == State::IO_ERROR; }
 
   void expect_state(State s) {
 #if !defined(NDEBUG)
-    if (s != iou_state_) {
+    if (s != state_) {
       std::cerr << "Expected state:" << state_to_str(s)
-		<< " but got:" << state_to_str(iou_state_) << std::endl;
+		<< " but got:" << state_to_str(state_) << std::endl;
       abort();
     }
 #endif
@@ -78,19 +81,17 @@ public:
   void expect_io_done() { expect_state(State::IO_DONE); }
 
   // interface for the poller:
-  void set_error(void) { iou_state_ = State::IO_ERROR; }
-  void set_done(void)  { iou_state_ = State::IO_DONE; }
+  void set_error(void) { state_ = State::IO_ERROR; }
+  void set_done(void)  { state_ = State::IO_DONE; }
   void complete(RetT val);
   // Executed by the initiator of the request
+  int submit();
   bool is_ready() { return is_io_done(); }
   RetT wait();
   // in some cases, we might want to perform a "dummy" read, i.e., memcpy data
   // from a buffer istead of actually doing IO. In other words, we run the
   // completion in the request, and not in the context of the poller.
   void fake_read(const void *src, size_t src_nbytes);
-
-  enum State { INVALID, INITIALIZED, IO_SUBMITTED, IO_ERROR, IO_DONE, };
-  enum IouOpCode { INVALID, PREADV, PWRITE };
 
   static std::string state_to_str(State &s) {
     switch (s) {
@@ -103,16 +104,16 @@ public:
     }
   }
 
-  State state() { return iou_state_; }
+  State state() { return state_; }
 private:
   //
   LocalSingleAsyncObj iou_lsaobj_;
-  State iou_state_;
+  State state_;
   IouOpCode op_code_;
   int fd_;
-  int64_t offset_;
   struct iovec *iovec_;
   int iovec_cnt_;
+  int64_t offset_;
 };
 
 

@@ -1,10 +1,11 @@
-b/*
+/*
  *  Copyright (c) 2020 International Business Machines
  *  All rights reserved.
  *
  *  SPDX-License-Identifier: BSD-3-Clause
  *
  *  Authors: Kornilios Kourtis (kou@zurich.ibm.com, kornilios@gmail.com)
+ *           Nikolas Ioannou (nio@zurich.ibm.com, nicioan@gmail.com)
  *
  */
 
@@ -33,7 +34,7 @@ struct UringState {
     enum class State {UNINITIALIZED, READY, DRAINING, DONE};
     size_t              iou_pending_;
     State               iou_state_;
-    iouring_t           ring_;
+    struct io_uring     ring_;
     static const size_t iou_maxio_ = 1024;
 
     static const size_t iou_ioq_size_ = 128;
@@ -49,11 +50,11 @@ struct UringState {
     ~UringState() {
         if (iou_state_ != State::DONE && iou_state_ != State::UNINITIALIZED) {
             fprintf(stderr, "%s: **** Did not finalize correctly\n", __PRETTY_FUNCTION__);
-	    io_uring_queue_exit(ring_);
+	    io_uring_queue_exit(&ring_);
         }
     }
 
-    bool is_initialized(void) { return iou_state_ == State::UNINITIALIZED; }
+    bool is_initialized(void) { return iou_state_ != State::UNINITIALIZED; }
 
     const char *state_str(State s) {
         switch(s) {
@@ -103,7 +104,7 @@ struct UringState {
         if (iou_ioq_nr_ == 0)
             return;
 
-	int ret = io_uring_submit(&ring);
+	int ret = ::io_uring_submit(&ring_);
         if (ret < 0) {
             perror("io_submit");
             abort();
@@ -121,7 +122,7 @@ struct UringState {
     //     flush_ioq_();
     //     return io_submit(aio_ctx_, nr,  iocbpp);
     // }
-
+ 
     // -1 on error. Sets errno.
     int submit(struct io_uring_sqe *sqe) {
         // TODO: return an error here if state is DRAINING
@@ -140,6 +141,28 @@ struct UringState {
         return 0;
     }
 
+    int peek_batch_cqe(int max_events, struct io_uring_cqe **cqes_batch) {
+      if (iou_pending_ > 0) flush_ioq_();
+      return ::io_uring_peek_batch_cqe(&ring_, cqes_batch, max_events);
+    }
+
+    // int peek_batch_cqe(int count, struct io_uring_cqe **cqes_batch) {
+    //   return io_uring_peek_batch_cqe(&ring_, cqes_batch, count);
+    // }
+
+    int wait_cqe_nr(int count, struct io_uring_cqe **cqes) {
+      if (iou_pending_ > 0) flush_ioq_();
+      return ::io_uring_wait_cqe_nr(&ring_, cqes, count);
+    }
+
+    void cqe_seen(struct io_uring_cqe *cqe) {
+       ::io_uring_cqe_seen(&ring_, cqe);
+      iou_pending_--;
+      if (iou_pending_ == 0 && iou_state_ == State::DRAINING) {
+	done_();
+      }
+    }
+
     void stop(void) {
         if (iou_state_ != State::READY) {
             fprintf(stderr, "%s: invalid state\n", __PRETTY_FUNCTION__);
@@ -147,16 +170,19 @@ struct UringState {
         }
 
         iou_state_ = State::DRAINING;
-        //printf("iou_pending: %zd\n", iou_pending_);
         if (iou_pending_ == 0)
             done_();
+	else {
+          //printf("iou_pending: %zd\n", iou_pending_);
+	  flush_ioq_();
+	}
     }
 
     void done_(void) {
         assert(iou_state_ == State::DRAINING);
         assert(iou_pending_ == 0);
         iou_state_ = State::DONE;
-	io_uring_queue_exit(ring_);
+	io_uring_queue_exit(&ring_);
     }
 
     bool is_done(void) {
