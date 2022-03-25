@@ -53,7 +53,7 @@ endif
 
 ifeq (1, $(BUILD_URING))
 	CXXFLAGS += -D_GNU_SOURCE -Iexternal/liburing/src/include
-	LDFLAGS += -Lexternal/liburing/src -luring
+	LIBS += -Lexternal/liburing/src -luring
 endif
 
 build_DIR = $(BUILD_DIR)
@@ -228,6 +228,9 @@ build_spdk:
 	cd external/dpdk && EXTRA_CFLAGS="-fPIC" make -j10 install T=x86_64-native-linuxapp-gcc DESTDIR=dpdk
 	cd external/spdk && patch -p1 < ../spdk.patch
 	cd external/spdk && ./configure --with-dpdk=../dpdk/dpdk && make -j10
+
+build_uring:
+	cd external/liburing && EXTRA_CFLAGS="-fPIC" make
 
 $(build_DIR)/%.o: $(src_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) -c  $< -o $@

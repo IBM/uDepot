@@ -5,6 +5,7 @@ BUILD_SPDK           ?= 0
 BUILD_JNI            ?= 1
 BUILD_SDT            ?= 0
 BUILD_FPIC           ?= 1
+BUILD_URING          ?= 1
 # BUILD_TYPE options: DEBUG, NORMAL, PERFORMANCE
 BUILD_TYPE           ?= NORMAL
 USE_TCMALLOC         ?= 0
@@ -97,6 +98,10 @@ endif
 ifeq (1,$(USE_TCMALLOC))
         LIBS       += -ltcmalloc
         CXXFLAGS   += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+endif
+
+ifeq (1, $(BUILD_URING))
+	LIBS += -Ltrt/external/liburing/src -luring
 endif
 
 DPDK_INC   = -I$(TRT_DIR)/external/dpdk/dpdk/include/dpdk
@@ -212,13 +217,15 @@ $(TRT_DIR)/external/spdk/configure:
 
 ifeq (1,$(BUILD_SPDK))
 build_spdk:
-	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) build_spdk
+	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) build_spdk
 endif
 
-
 build_trt:
-	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) builddirs
-	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) $(LIBTRT_OBJ:$(TRT_DIR)/%=%)
+	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) builddirs
+ifeq (1,$(BUILD_URING))
+	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) build_uring
+endif
+	$(MAKE) -C $(TRT_DIR) BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) $(LIBTRT_OBJ:$(TRT_DIR)/%=%)
 
 $(LIBTRT_OBJ): build_trt
 	@true # dummy recipe, so that Makefile cannot be smart and deduce that $(LIBTRT_OBJ) cannot change (as it does with an empty recipe)
