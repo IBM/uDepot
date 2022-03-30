@@ -179,6 +179,8 @@ template class uDepot<RuntimePosixODirect>;
 template class uDepot<RuntimePosixODirectMC>;
 template class uDepot<RuntimeTrt>;
 template class uDepot<RuntimeTrtMC>;
+template class uDepot<RuntimeTrtUring>;
+template class uDepot<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepot<RuntimeTrtSpdk>;
 template class uDepot<RuntimeTrtSpdkArray>;

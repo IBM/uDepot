@@ -154,8 +154,14 @@ IOU::poller_task(void *unused) {
                 val = (RetT)cqe->res;
             } else {
                 fprintf(stderr, "iou event error: %s\n", strerror(cqe->res));
-                iou_op->set_error();
-                val = (RetT)-1;
+		// if (cqe->res == -EAGAIN) {
+		//   // retry
+		//   iou_op->set_done();
+		//   val = (RetT)cqe->res;
+		// } else {
+		  iou_op->set_error();
+		  val = (RetT) -1;
+		// }
             }
 
             iou_op->complete(val);

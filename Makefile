@@ -21,6 +21,9 @@ INCLUDES    = -Isrc/include/                \
               -I$(SALSA_DIR)/src/include    \
               -I$(TRT_DIR)/src/             \
               -I$(LIBCITYHASH_DIR)/..
+ifeq (1, $(BUILD_URING))
+	INCLUDES += -Itrt/external/liburing/src/include
+endif
 
 CXX        ?= g++
 CXXFLAGS   += -Wall -Werror -std=c++11 $(INCLUDES)
@@ -55,6 +58,7 @@ udepot_SRC = src/uDepot/udepot.cc                            \
              src/uDepot/lsa/metadata.cc                      \
              src/uDepot/io/file-direct.cc                    \
              src/uDepot/io/trt-aio.cc                        \
+             src/uDepot/io/trt-uring.cc                        \
              src/uDepot/rwlock-pagefault.cc                  \
              src/uDepot/rwlock-pagefault-trt.cc              \
              src/uDepot/net.cc                               \

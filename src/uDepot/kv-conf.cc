@@ -44,7 +44,9 @@ KV_conf::valid_kv_type(const kv_type type)
 		case KV_UDEPOT_SALSA_TRT_SPDK_ARRAY_MC:
 #endif
 		case KV_UDEPOT_SALSA_TRT_AIO:
+		case KV_UDEPOT_SALSA_TRT_URING:
 		case KV_UDEPOT_SALSA_TRT_AIO_MC:
+		case KV_UDEPOT_SALSA_TRT_URING_MC:
 		case KV_UDEPOT_SALSA_O_DIRECT_MC:
 		return true;
 
@@ -147,11 +149,13 @@ KV_conf::type_to_string(const kv_type type)
 		case KV_UDEPOT_SALSA_O_DIRECT: return std::string("SALSA_O_DIRECT");
 		case KV_UDEPOT_SALSA_SPDK:     return std::string("SALSA_SPDK");
 		case KV_UDEPOT_SALSA_TRT_AIO:  return std::string("SALSA_TRT_AIO");
+		case KV_UDEPOT_SALSA_TRT_URING:  return std::string("SALSA_TRT_URING");
 		case KV_UDEPOT_SALSA_TRT_SPDK: return std::string("SALSA_TRT_SPDK");
 		case KV_UDEPOT_SALSA_TRT_SPDK_ARRAY: return std::string("SALSA_TRT_SPDK_ARRAY");
 		case KV_UDEPOT_SALSA_O_DIRECT_MC: return std::string("SALSA_O_DIRECT_MC");
 		case KV_UDEPOT_SALSA_TRT_SPDK_ARRAY_MC: return std::string("SALSA_TRT_SPDK_ARRAY_MC");
 		case KV_UDEPOT_SALSA_TRT_AIO_MC: return std::string("SALSA_TRT_AIO_MC");
+		case KV_UDEPOT_SALSA_TRT_URING_MC: return std::string("SALSA_TRT_URING_MC");
 		case KV_UDEPOT_LAST:           return std::string("__LAST__");
 	}
 	return std::string("Invalid type");

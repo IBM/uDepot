@@ -21,7 +21,7 @@
 
 namespace udepot {
 
-const size_t                                    MAX_TLS_FDS      = 128;
+const size_t MAX_TLS_FDS      = 128;
 static thread_local std::array<int,MAX_TLS_FDS> fd_tls__{-1};
 
 static size_t
@@ -287,8 +287,8 @@ TrtFileIO::msync(void *addr, size_t len, int flags)
 	}
 
 	const ssize_t rc = pwrite(addr, len, f->second.off);
-	UDEPOT_MSG("msync pwrite addr=%p len=%lu rc=%ld off=%lu.",
-		addr, len, rc, f->second.off);
+	UDEPOT_MSG("msync pwrite addr=%p len=%lu rc=%ld off=%lu errno=%s.",
+		   addr, len, rc, f->second.off, strerror(errno));
 	return (ssize_t) len == rc ? 0 : ({errno = EIO; -1;});
 }
 

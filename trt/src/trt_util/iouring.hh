@@ -146,6 +146,11 @@ struct UringState {
       return ::io_uring_peek_batch_cqe(&ring_, cqes_batch, max_events);
     }
 
+    int peek_cqe(struct io_uring_cqe **cqe) {
+      if (iou_pending_ > 0) flush_ioq_();
+      return ::io_uring_peek_cqe(&ring_, cqe);
+    }
+
     // int peek_batch_cqe(int count, struct io_uring_cqe **cqes_batch) {
     //   return io_uring_peek_batch_cqe(&ring_, cqes_batch, count);
     // }

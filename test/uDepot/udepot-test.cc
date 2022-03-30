@@ -42,6 +42,7 @@
 
 #include "trt/uapi/trt.hh"
 #include "trt_backends/trt_aio.hh"
+#include "trt_backends/trt_iou.hh"
 #include "trt_util/arg_pool.hh"
 
 using namespace udepot;
@@ -670,7 +671,10 @@ threadfn()
 		case KV_conf::KV_UDEPOT_SALSA_TRT_AIO:
 			if (conf_g.gc_test_m) return gc_test_thread<RuntimeTrt>;
 			return test_thread<RuntimeTrt>;
-		#if defined(UDEPOT_TRT_SPDK)
+		case KV_conf::KV_UDEPOT_SALSA_TRT_URING:
+			if (conf_g.gc_test_m) return gc_test_thread<RuntimeTrtUring>;
+			return test_thread<RuntimeTrtUring>;
+#if defined(UDEPOT_TRT_SPDK)
 		case KV_conf::KV_UDEPOT_SALSA_SPDK:
 			if (conf_g.gc_test_m) return gc_test_thread<RuntimePosixSpdk>;
 			return test_thread<RuntimePosixSpdk>;
@@ -680,7 +684,7 @@ threadfn()
 		case KV_conf::KV_UDEPOT_SALSA_TRT_SPDK_ARRAY:
 			if (conf_g.gc_test_m) return gc_test_thread<RuntimeTrtSpdkArray>;
 			return test_thread<RuntimeTrtSpdkArray>;
-		#endif
+#endif
 		default:
 			UDEPOT_ERR("Unsupported backend: %u\n", static_cast<unsigned>(conf_g.type_m));
 			exit(1);
@@ -1017,6 +1021,7 @@ int main_trt()
 		}
 #endif
 		case KV_conf::KV_UDEPOT_SALSA_TRT_AIO:
+		case KV_conf::KV_UDEPOT_SALSA_TRT_URING:
 		{
 			trt::Controller c;
 			prepare_args();
@@ -1282,12 +1287,14 @@ int main(const int argc, char *argv[])
 
 	if (conf_g.type_m == KV_conf::KV_UDEPOT_SALSA_TRT_AIO) {
 		err = main_trt<RuntimeTrt>();
-	#if defined(UDEPOT_TRT_SPDK)
+	} else if (conf_g.type_m == KV_conf::KV_UDEPOT_SALSA_TRT_URING) {
+		err = main_trt<RuntimeTrtUring>();
+#if defined(UDEPOT_TRT_SPDK)
 	} else if (conf_g.type_m == KV_conf::KV_UDEPOT_SALSA_TRT_SPDK) {
 		err = main_trt<RuntimeTrtSpdk>();
 	} else if (conf_g.type_m == KV_conf::KV_UDEPOT_SALSA_TRT_SPDK_ARRAY) {
 		err = main_trt<RuntimeTrtSpdkArray>();
-	#endif
+#endif
 	} else {
 		err = main_threads();
 	}
@@ -1411,9 +1418,9 @@ int test_crash_recovery_minimal ()
 		assert(0 == rc);
 		assert(0 == memcmp(val, val_out, sizeof(val)));
 		assert(val_size_read == val_size);
+		// no shutdown(), simulate crash with destructor
 		delete KV;
 
-		// no shutdown, model crash with destructor
 	} else {
 		int status;
 		const pid_t pid_ret = waitpid(pid, &status, 0);

@@ -291,6 +291,8 @@ template class uDepotSalsaMD<RuntimePosixODirect>;
 template class uDepotSalsaMD<RuntimePosixODirectMC>;
 template class uDepotSalsaMD<RuntimeTrt>;
 template class uDepotSalsaMD<RuntimeTrtMC>;
+template class uDepotSalsaMD<RuntimeTrtUring>;
+template class uDepotSalsaMD<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepotSalsaMD<RuntimeTrtSpdk>;
 template class uDepotSalsaMD<RuntimeTrtSpdkArray>;

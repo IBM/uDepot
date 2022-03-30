@@ -50,6 +50,9 @@ KV_factory::KV_new(const KV_conf &conf)
 		case KV_conf::KV_UDEPOT_SALSA_TRT_AIO:
 			ret = uDepotSalsa_new<RuntimeTrt>(conf);
 			break;
+		case KV_conf::KV_UDEPOT_SALSA_TRT_URING:
+			ret = uDepotSalsa_new<RuntimeTrtUring>(conf);
+			break;
 		#if defined(UDEPOT_TRT_SPDK)
 		case KV_conf::KV_UDEPOT_SALSA_SPDK:
 			ret = uDepotSalsa_new<RuntimePosixSpdk>(conf);
@@ -69,6 +72,9 @@ KV_factory::KV_new(const KV_conf &conf)
 			break;
 		case KV_conf::KV_UDEPOT_SALSA_TRT_AIO_MC:
 			ret = uDepotSalsa_new<RuntimeTrtMC>(conf);
+			break;
+		case KV_conf::KV_UDEPOT_SALSA_TRT_URING_MC:
+			ret = uDepotSalsa_new<RuntimeTrtUringMC>(conf);
 			break;
 		default:
 			UDEPOT_ERR("Unsupported backend: %u\n", static_cast<unsigned>(conf.type_m));

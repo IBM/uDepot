@@ -870,6 +870,8 @@ template class uDepotDirectoryMap<RuntimePosixODirect>;
 template class uDepotDirectoryMap<RuntimePosixODirectMC>;
 template class uDepotDirectoryMap<RuntimeTrt>;
 template class uDepotDirectoryMap<RuntimeTrtMC>;
+template class uDepotDirectoryMap<RuntimeTrtUring>;
+template class uDepotDirectoryMap<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepotDirectoryMap<RuntimeTrtSpdk>;
 template class uDepotDirectoryMap<RuntimeTrtSpdkArray>;
