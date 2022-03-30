@@ -98,7 +98,7 @@ trt_backends_SRC =                     \
  $(src_DIR)/trt_backends/trt_epoll.cc      \
 
 ifeq (1, $(BUILD_URING))
-      trt_backends_SRC   +=  $(src_DIR)/trt_backends/trt_iou.cc
+      trt_backends_SRC   +=  $(src_DIR)/trt_backends/trt_uring.cc
 endif
 
 jctx_TESTS =                  \
@@ -129,7 +129,7 @@ trt_TESTS = \
 
 trt_uring_TESTS = \
   $(build_DIR)/tests/uring_test                        \
-  $(build_DIR)/benchs/trt_iou_bench                        \
+  $(build_DIR)/benchs/trt_uring_bench                        \
 
 ifeq (1, $(BUILD_URING))
       trt_TESTS   += $(trt_uring_TESTS)

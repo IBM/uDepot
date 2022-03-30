@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "trt/local_single_sync.hh"
-#include "trt_util/iouring.hh"
+#include "trt_util/uring.hh"
 
 namespace trt {
 

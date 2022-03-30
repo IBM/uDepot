@@ -16,7 +16,7 @@
 #include <fcntl.h>
 
 #include "trt/uapi/trt.hh"
-#include "trt_backends/trt_iou.hh"
+#include "trt_backends/trt_uring.hh"
 
 extern "C" {
     #include "trt_util/timer.h"

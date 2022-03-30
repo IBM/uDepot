@@ -42,7 +42,7 @@
 
 #include "trt/uapi/trt.hh"
 #include "trt_backends/trt_aio.hh"
-#include "trt_backends/trt_iou.hh"
+#include "trt_backends/trt_uring.hh"
 #include "trt_util/arg_pool.hh"
 
 using namespace udepot;

@@ -12,7 +12,7 @@
 // vim: set expandtab softtabstop=4 tabstop:4 shiftwidth:4:
 
 #include "trt/uapi/trt.hh"
-#include "trt_backends/trt_iou.hh"
+#include "trt_backends/trt_uring.hh"
 
 namespace trt {
 
