@@ -58,7 +58,8 @@ IouOp::submit() {
 static ssize_t
 iou_op_submit_and_wait(IouOp::IouOpCode op, int fd, struct iovec *iov, int iovcnt, off_t off) {
     IouOp iou_op (op, fd, iov, iovcnt, off);
-    //trt_dmsg("Submitting\n");
+    // trt_dmsg("Submitting op %s fd=%u iov=%p iovcnt=%d off=%lu\n", op == IouOp::IouOpCode::PREADV ? "PREADV" : "PWRITEV",
+    // 	     fd, iov, iovcnt, off);
     int submit_ret = iou_op.submit();
     if (submit_ret == -1)
         return (ssize_t)-1;
@@ -153,14 +154,14 @@ IOU::poller_task(void *unused) {
                 iou_op->set_done();
                 val = (RetT)cqe->res;
             } else {
-                fprintf(stderr, "iou event error: %s\n", strerror(cqe->res));
+                fprintf(stderr, "iou event error: %s\n", strerror(-cqe->res));
 		// if (cqe->res == -EAGAIN) {
 		//   // retry
 		//   iou_op->set_done();
 		//   val = (RetT)cqe->res;
 		// } else {
 		  iou_op->set_error();
-		  val = (RetT) -1;
+		  val = (RetT) cqe->res;
 		// }
             }
 

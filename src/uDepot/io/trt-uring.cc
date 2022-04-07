@@ -25,7 +25,6 @@ const size_t MAX_TLS_FDS      = 128;
 static thread_local std::array<int,MAX_TLS_FDS> fd_tls__{-1};
 
 TrtFileIOUring::TrtFileIOUring() : TrtFileIO() {
-	//trt_init_if_needed();
 }
 
 int
@@ -40,7 +39,7 @@ TrtFileIOUring::get_tls_fd(void) {
 
 	fd = ::open(pathname_m.c_str(), flags_m, mode_m);
 	if (fd == -1) {
-		UDEPOT_ERR("Error openning %s: %s\n", pathname_m.c_str(), strerror(errno));
+		UDEPOT_ERR("Error opening %s: %s\n", pathname_m.c_str(), strerror(errno));
 		fd = fd_m;
 	}
 
@@ -62,9 +61,10 @@ TrtFileIOUring::open(const char *pathname, int flags, mode_t mode) {
 	}
 
 	fd_m = ::open(pathname, flags | O_DIRECT | O_NOATIME, mode);
-	if (fd_m == -1)
+	if (fd_m == -1) {
+		UDEPOT_ERR("Error opening %s: %s\n", pathname_m.c_str(), strerror(errno));
 		return errno;
-
+	}
 	pathname_m = std::string(pathname);
 	flags_m = flags | O_DIRECT | O_NOATIME;
 	mode_m = mode;
@@ -114,7 +114,7 @@ ssize_t TrtFileIOUring::pwrite(const void *buff, size_t len, off_t off) {
 	const size_t block_size = (1UL << 24); // 16 MB
 	for (; 0 < len; tot += rc) {
 		size_t l = std::min(len, block_size);
-		if (unlikely(off & 4095)) {
+		if (unlikely(off & 511)) {
 			errno = EINVAL;
 			return -1;
 		}

@@ -148,7 +148,7 @@ void *t_main(void *arg__) {
 
     trt_dmsg("%s: YIELDING\n", __FUNCTION__);
     T::yield(); // allow all submitters to write
-    IOU::stop(); // stop aio
+    IOU::stop(); // stop uring
     trt_dmsg("%s: DONE\n", __FUNCTION__);
 
     return nullptr;

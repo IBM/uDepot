@@ -252,7 +252,7 @@ TrtFileIO::mmap(void *const addr, size_t len, const int prot, const int flags, c
        IoVec<Ptr> iov_ptr(iov, 1);
        const ssize_t rc = preadv_native(iov_ptr, off);
        if ((ssize_t) len != rc) {
-	       UDEPOT_MSG("preadv failed  addr=%p len=%lu rc=%ld off=%lu.", ptr, len, rc, off);
+	       UDEPOT_MSG("preadv failed  addr=%p len=%lu rc=%ld off=%lu err=%s.", ptr, len, rc, off, strerror(errno));
                const int rc2 __attribute__((unused)) = ::munmap(ptr, len);
                assert(0 == rc2);
                errno = EIO;
