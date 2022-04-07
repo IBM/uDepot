@@ -147,15 +147,15 @@ trt_spdk_TESTS_OBJ = $(patsubst %, %.o, $(trt_spdk_TESTS))
 
 trt_rdma_TESTS = $(build_DIR)/tests/trt_rdma_echo
 
-DPDK_INC   = -Iexternal/dpdk/dpdk/include/dpdk
+DPDK_INC   = -Iexternal/dpdk/build/include
 SPDK_INC   = $(DPDK_INC) -Iexternal/spdk/include
 SPDK_LIBS  = external/spdk/build/lib/libspdk_nvme.a     \
              external/spdk/build/lib/libspdk_util.a     \
              external/spdk/build/lib/libspdk_log.a      \
              external/spdk/build/lib/libspdk_env_dpdk.a \
              -lpciaccess \
-             -Lexternal/dpdk/dpdk/lib \
-             -Wl,-rpath=external/dpdk/dpdk/lib \
+             -Lexternal/dpdk/build/lib \
+             -Wl,-rpath=external/dpdk/build/lib \
              -lrte_eal -lrte_mempool -lrte_ring \
              -ldl -lrt
 
@@ -224,10 +224,11 @@ builddirs:
 	[ -d $(build_DIR)/benchs ] || mkdir $(build_DIR)/benchs
 
 build_spdk:
-	cd external/dpdk && patch -p1 < ../dpdk.patch
-	cd external/dpdk && EXTRA_CFLAGS="-fPIC" make -j10 install T=x86_64-native-linuxapp-gcc DESTDIR=dpdk
-	cd external/spdk && patch -p1 < ../spdk.patch
-	cd external/spdk && ./configure --with-dpdk=../dpdk/dpdk && make -j10
+	cd external/dpdk && git reset --hard && patch -p1 < ../dpdk.patch
+	# cd external/dpdk && EXTRA_CFLAGS="-fPIC" make -j10 install T=x86_64-native-linuxapp-gcc DESTDIR=dpdk
+	cd external/dpdk && make clean && make config T=x86_64-native-linuxapp-gcc && CONFIG_RTE_BUILD_COMBINE_LIBS=y MODULE_CFLAGS="-Wno-implicit-fallthrough" EXTRA_CFLAGS="-msse4.2 -fPIC" make -j10
+	cd external/spdk && git reset --hard && patch -p1 < ../spdk.patch
+	cd external/spdk && make clean && ./configure --with-dpdk=../dpdk && make -j DPDK_DIR=../dpdk/build
 
 build_uring:
 	cd external/liburing && CFLAGS="-fpic -fPIC" CPPFLAGS="-fpic -fPIC" LINK_FLAGS="-fpic -fPIC" make

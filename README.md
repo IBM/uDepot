@@ -197,8 +197,10 @@ JNI test in `test/jni/uDepotJNITest.java`.
   Use trt, spdk backend, and use zero copy on the client side. Examples udepot-test:
   aio (-u 5):
   `sudo bin/udepot-test -f /dev/nvme0n1 -w 1000000 -r 1000000 -t 20 --grain-size 4096 --val-size 3072 -u 5 --thin --zero-copy`
+  io_uring (-u 6):
+  `sudo bin/udepot-test -f /dev/nvme0n1 -w 1000000 -r 1000000 -t 20 --grain-size 4096 --val-size 3072 -u 6 --thin --zero-copy`
   spdk (-u 7):
-  `sudo bin/udepot-test -f PHKS73350074375AGN,PHKS7335009N375AGN -w 10000000 -r 10000000 -t 20 --grain-size 4096 --val-size 3072 -u 7 --thin --zero-copy`
+  `sudo bin/udepot-test -f PHKS73350074375AGN,PHKS7335009N375AGN -w 10000000 -r 10000000 -t 20 --grain-size 4096 --val-size 3072 -u 8 --thin --zero-copy`
 
 - JNI does not currently work with SPDK backend due to
   incompatibilites with dpdk version only being tested with static

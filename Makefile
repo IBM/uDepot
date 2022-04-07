@@ -108,14 +108,14 @@ ifeq (1, $(BUILD_URING))
 	LIBS += -Ltrt/external/liburing/src -luring
 endif
 
-DPDK_INC   = -I$(TRT_DIR)/external/dpdk/dpdk/include/dpdk
+DPDK_INC   = -I$(TRT_DIR)/external/dpdk/build/include
 SPDK_INC   = $(DPDK_INC) -I$(TRT_DIR)/external/spdk/include
 SPDK_LIBS  = $(TRT_DIR)/external/spdk/build/lib/libspdk_nvme.a     \
              $(TRT_DIR)/external/spdk/build/lib/libspdk_util.a     \
              $(TRT_DIR)/external/spdk/build/lib/libspdk_log.a      \
              $(TRT_DIR)/external/spdk/build/lib/libspdk_env_dpdk.a \
-             -L$(TRT_DIR)/external/dpdk/dpdk/lib \
-             -Wl,-rpath=$(TRT_DIR)/external/dpdk/dpdk/lib \
+             -L$(TRT_DIR)/external/dpdk/build/lib \
+             -Wl,-rpath=$(TRT_DIR)/external/dpdk/build/lib \
              -lrte_eal -lrte_mempool -lrte_ring \
              -ldl -lrt
 
@@ -453,9 +453,23 @@ ifneq ($(MAKECMDGOALS),clean)
 endif
 
 
-.PHONY: docker-package
+.PHONY: docker-package docker-image docker-build
 
 docker-package: $(MC_SERVER) $(LIBCITYHASH_LIB)
 	cp external/cityhash/src/.libs/libcityhash.so.0 scripts/docker/
 	cp $(MC_SERVER) scripts/docker/
-	docker build --tag "udepot-ubuntu-18.04:`git rev-parse --short HEAD`" scripts/docker
+	docker build --tag "u18.04-udepot:`git rev-parse --short HEAD`" scripts/docker
+
+docker-image:
+	docker build --tag "u18.04-udepot:`git rev-parse --short HEAD`" -f Dockerfile .
+
+docker-build: docker-image
+	#docker stop udepot-build
+	#docker rm udepot-build
+	docker run -d -i -t --network host --privileged --volume ${PWD}:/udepot/ --name udepot-build "u18.04-udepot:`git rev-parse --short HEAD`"  bash
+ifeq (1, $(BUILD_SPDK))
+	docker exec -i -t udepot-build /bin/sh -c "cd /udepot; cd trt && make clean && cd -; make clean; BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) make build_spdk"
+endif
+	docker exec -i -t udepot-build /bin/sh -c "cd /udepot; make clean; BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) make -j10; BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) make -j10; make"
+	docker stop udepot-build
+	docker rm udepot-build

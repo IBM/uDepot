@@ -7,7 +7,7 @@ index 20721228..5e9ed57b 100644
  }
  
 -: ${NRHUGE:=1024}
-+: ${NRHUGE:=16384}
++: ${NRHUGE:=8192}
  
  username=$1
  mode=$2
