@@ -861,7 +861,8 @@ uDepotDirectoryMap<RT>::seg_md_callback(const u64 grain_start, const u64 grain_n
 {
 	std::vector<DirMapEntry> *const directory = dir_ref_m.directory;
 	assert(grain_nr == md_m.get_seg_md_size());
-	assert(0  == md_m.persist_seg_md(grain_start, directory->size(), type_m));
+	int rc __attribute__((unused)) = md_m.persist_seg_md(grain_start, directory->size(), type_m);
+	assert(0  == rc);
 }
 
 // instantiate the templates

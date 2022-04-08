@@ -466,7 +466,7 @@ docker-image:
 docker-build: docker-image
 	#docker stop udepot-build
 	#docker rm udepot-build
-	docker run -d -i -t --network host --privileged --volume ${PWD}:/udepot/ --name udepot-build "u18.04-udepot:`git rev-parse --short HEAD`"  bash
+	docker run -d -i -t --network host --privileged -v /usr/src:/usr/src -v /lib/modules/$(uname -r):/lib/modules/$(uname -r) --volume ${PWD}:/udepot/ --name udepot-build "u18.04-udepot:`git rev-parse --short HEAD`"  bash
 ifeq (1, $(BUILD_SPDK))
 	docker exec -i -t udepot-build /bin/sh -c "cd /udepot; cd trt && make clean && cd -; make clean; BUILD_SPDK=$(BUILD_SPDK) BUILD_PIC=$(BUILD_FPIC) BUILD_TYPE=$(BUILD_TYPE) BUILD_SDT=$(BUILD_SDT) BUILD_URING=$(BUILD_URING) make build_spdk"
 endif

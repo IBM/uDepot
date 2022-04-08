@@ -59,7 +59,7 @@ constexpr u64 prime_g = 2654435761UL;
 struct udepot_test_conf : public KV_conf {
 
     // default values
-    const size_t TRT_NTASKS = 32;
+    const size_t TRT_NTASKS = 128;
 
     udepot_test_conf()
 	: KV_conf(),
