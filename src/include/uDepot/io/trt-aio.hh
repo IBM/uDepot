@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef	_UDEPOT_TRT_IO_H_
-#define	_UDEPOT_TRT_IO_H_
+#ifndef	_UDEPOT_TRT_AIO_H_
+#define	_UDEPOT_TRT_AIO_H_
 
 /**
  * trt file IO backend for uDepot
@@ -25,8 +25,8 @@ namespace udepot {
 /**
  * Trt aio file backend
  */
-class TrtFileIO final : public udepot::FileIO_,
-                        public IoBuffMemalign<4096> {
+class TrtFileIO : public udepot::FileIO_,
+		  public IoBuffMemalign<4096> {
 public:
 	TrtFileIO();
 	TrtFileIO(FileIO const &)         = delete;
@@ -57,14 +57,14 @@ public:
 	// NB: It would actually made more sense if pread() and pwrite() were
 	// implemented by calling pread_native() and pwritev_native().
 	using Ptr = IoBuffMemalign<4096>::Ptr;
-	ssize_t pread_native(Ptr buff, size_t len, off_t off);
+	virtual ssize_t pread_native(Ptr buff, size_t len, off_t off);
 
-	ssize_t pwrite_native(Ptr buff, size_t len, off_t off);
+	virtual ssize_t pwrite_native(Ptr buff, size_t len, off_t off);
 
 	// error is returned as negative number
-	ssize_t preadv_native(IoVec<Ptr>  iov, off_t off);
+	virtual ssize_t preadv_native(IoVec<Ptr>  iov, off_t off);
 
-	ssize_t pwritev_native(IoVec<Ptr> iov, off_t off);
+	virtual ssize_t pwritev_native(IoVec<Ptr> iov, off_t off);
 
 	void *mmap(void *addr, size_t len, int prot, int flags, off_t off) override;
 	int msync(void *addr, size_t len, int flags) override;
@@ -72,7 +72,7 @@ public:
 
 	~TrtFileIO() {}
 
-private:
+protected:
 	std::map<void *, mregion> mmap_off_m;
 
 	std::string pathname_m;
@@ -80,10 +80,10 @@ private:
 	mode_t      mode_m;
 	size_t      fd_tls_id_m;
 
-	void trt_init_if_needed();
-	int get_tls_fd(void);
+	virtual void trt_init_if_needed();
+	virtual int get_tls_fd(void);
 };
 
 } // end udepot namespace
 
-#endif /* _UDEPOT_TRT_IO_H_ */
+#endif /* _UDEPOT_TRT_AIO_H_ */

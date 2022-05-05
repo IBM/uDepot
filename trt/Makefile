@@ -3,6 +3,7 @@
 BUILD_SPDK   ?= 0
 BUILD_RDMA   ?= 0
 BUILD_PIC    ?= 1
+BUILD_URING  ?= 1
 USE_TCMALLOC ?= 0
 BUILD_SDT    ?= 0 # tracing
 BUILD_TYPE   ?= NORMAL
@@ -50,6 +51,11 @@ ifeq (1, $(BUILD_RDMA))
       LDFLAGS += -libverbs -lrdmacm
 endif
 
+ifeq (1, $(BUILD_URING))
+	CXXFLAGS += -D_GNU_SOURCE -Iexternal/liburing/src/include
+	LIBS += -Lexternal/liburing/src -luring
+endif
+
 build_DIR = $(BUILD_DIR)
 src_DIR   = src
 
@@ -91,6 +97,10 @@ trt_backends_SRC =                     \
  $(src_DIR)/trt_backends/trt_aio.cc        \
  $(src_DIR)/trt_backends/trt_epoll.cc      \
 
+ifeq (1, $(BUILD_URING))
+      trt_backends_SRC   +=  $(src_DIR)/trt_backends/trt_uring.cc
+endif
+
 jctx_TESTS =                  \
  $(jctx_build_DIR)/jctx-test-simple \
  $(jctx_build_DIR)/jctx-test-setjmp \
@@ -117,6 +127,14 @@ trt_TESTS = \
   $(build_DIR)/benchs/trt_aio_bench                   \
   $(build_DIR)/benchs/trt_ubench                      \
 
+trt_uring_TESTS = \
+  $(build_DIR)/tests/uring_test                        \
+  $(build_DIR)/benchs/trt_uring_bench                        \
+
+ifeq (1, $(BUILD_URING))
+      trt_TESTS   += $(trt_uring_TESTS)
+endif
+
 trt_spdk_TESTS = \
   $(build_DIR)/tests/spdk_test                        \
   $(build_DIR)/tests/trt_spdk_preadv_pwritev          \
@@ -129,15 +147,15 @@ trt_spdk_TESTS_OBJ = $(patsubst %, %.o, $(trt_spdk_TESTS))
 
 trt_rdma_TESTS = $(build_DIR)/tests/trt_rdma_echo
 
-DPDK_INC   = -Iexternal/dpdk/dpdk/include/dpdk
+DPDK_INC   = -Iexternal/dpdk/build/include
 SPDK_INC   = $(DPDK_INC) -Iexternal/spdk/include
 SPDK_LIBS  = external/spdk/build/lib/libspdk_nvme.a     \
              external/spdk/build/lib/libspdk_util.a     \
              external/spdk/build/lib/libspdk_log.a      \
              external/spdk/build/lib/libspdk_env_dpdk.a \
              -lpciaccess \
-             -Lexternal/dpdk/dpdk/lib \
-             -Wl,-rpath=external/dpdk/dpdk/lib \
+             -Lexternal/dpdk/build/lib \
+             -Wl,-rpath=external/dpdk/build/lib \
              -lrte_eal -lrte_mempool -lrte_ring \
              -ldl -lrt
 
@@ -206,10 +224,14 @@ builddirs:
 	[ -d $(build_DIR)/benchs ] || mkdir $(build_DIR)/benchs
 
 build_spdk:
-	cd external/dpdk && patch -p1 < ../dpdk.patch
-	cd external/dpdk && EXTRA_CFLAGS="-fPIC" make -j10 install T=x86_64-native-linuxapp-gcc DESTDIR=dpdk
-	cd external/spdk && patch -p1 < ../spdk.patch
-	cd external/spdk && ./configure --with-dpdk=../dpdk/dpdk && make -j10
+	cd external/dpdk && git reset --hard && patch -p1 < ../dpdk.patch
+	# cd external/dpdk && EXTRA_CFLAGS="-fPIC" make -j10 install T=x86_64-native-linuxapp-gcc DESTDIR=dpdk
+	cd external/dpdk; make clean; make config T=x86_64-native-linuxapp-gcc && CONFIG_RTE_BUILD_COMBINE_LIBS=y MODULE_CFLAGS="-Wno-implicit-fallthrough -Wno-address-of-packed-member -Wno-stringop-overflow -Wno-incompatible-pointer-types" EXTRA_CFLAGS="-msse4.2 -fPIC" make -j10
+	cd external/spdk && git reset --hard && patch -p1 < ../spdk.patch
+	cd external/spdk; make clean; ./configure --with-dpdk=../dpdk && make -j DPDK_DIR=../dpdk/build
+
+build_uring:
+	cd external/liburing && CFLAGS="-fpic -fPIC" CPPFLAGS="-fpic -fPIC" LINK_FLAGS="-fpic -fPIC" make
 
 $(build_DIR)/%.o: $(src_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) -c  $< -o $@
@@ -294,3 +316,6 @@ clean:
 	rm -f $(jctx_TESTS)
 	rm -f $(trt_spdk_TESTS)
 	rm -f $(trt_rdma_TESTS)
+	cd external/liburing && make clean && cd -
+
+

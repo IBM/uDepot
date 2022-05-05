@@ -21,7 +21,7 @@
 
 namespace udepot {
 
-const size_t                                    MAX_TLS_FDS      = 128;
+const size_t MAX_TLS_FDS      = 128;
 static thread_local std::array<int,MAX_TLS_FDS> fd_tls__{-1};
 
 static size_t
@@ -252,7 +252,7 @@ TrtFileIO::mmap(void *const addr, size_t len, const int prot, const int flags, c
        IoVec<Ptr> iov_ptr(iov, 1);
        const ssize_t rc = preadv_native(iov_ptr, off);
        if ((ssize_t) len != rc) {
-	       UDEPOT_MSG("preadv failed  addr=%p len=%lu rc=%ld off=%lu.", ptr, len, rc, off);
+	       UDEPOT_MSG("preadv failed  addr=%p len=%lu rc=%ld off=%lu err=%s.", ptr, len, rc, off, strerror(errno));
                const int rc2 __attribute__((unused)) = ::munmap(ptr, len);
                assert(0 == rc2);
                errno = EIO;
@@ -287,8 +287,8 @@ TrtFileIO::msync(void *addr, size_t len, int flags)
 	}
 
 	const ssize_t rc = pwrite(addr, len, f->second.off);
-	UDEPOT_MSG("msync pwrite addr=%p len=%lu rc=%ld off=%lu.",
-		addr, len, rc, f->second.off);
+	UDEPOT_MSG("msync pwrite addr=%p len=%lu rc=%ld off=%lu errno=%s.",
+		   addr, len, rc, f->second.off, strerror(errno));
 	return (ssize_t) len == rc ? 0 : ({errno = EIO; -1;});
 }
 

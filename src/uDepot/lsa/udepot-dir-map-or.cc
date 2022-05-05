@@ -555,6 +555,8 @@ template class uDepotDirMapOR<RuntimePosixODirect>;
 template class uDepotDirMapOR<RuntimePosixODirectMC>;
 template class uDepotDirMapOR<RuntimeTrt>;
 template class uDepotDirMapOR<RuntimeTrtMC>;
+template class uDepotDirMapOR<RuntimeTrtUring>;
+template class uDepotDirMapOR<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepotDirMapOR<RuntimeTrtSpdk>;
 template class uDepotDirMapOR<RuntimeTrtSpdkArray>;

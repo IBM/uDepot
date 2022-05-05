@@ -89,6 +89,8 @@ void memcache_conf::validate_and_sanitize_parameters()
 		break;
 	case KV_conf::KV_UDEPOT_SALSA_TRT_AIO_MC:
 		break;
+	case KV_conf::KV_UDEPOT_SALSA_TRT_URING_MC:
+		break;
 	#if defined(UDEPOT_TRT_SPDK)
 	case KV_conf::KV_UDEPOT_SALSA_TRT_SPDK_ARRAY_MC:
 		thread_max = 8;
@@ -248,6 +250,8 @@ int main(const int argc, char **argv)
 #endif
 	case KV_conf::KV_UDEPOT_SALSA_TRT_AIO_MC:
 		return memcache_server_trt<RuntimeTrtMC>();
+	case KV_conf::KV_UDEPOT_SALSA_TRT_URING_MC:
+		return memcache_server_trt<RuntimeTrtUringMC>();
 	case KV_conf::KV_UDEPOT_SALSA_O_DIRECT_MC:
 		break;
 	default:
@@ -366,6 +370,7 @@ static int memcache_server_trt()
 
 	switch(conf_g.type_m) {
 	case KV_conf::KV_UDEPOT_SALSA_TRT_AIO_MC:
+	case KV_conf::KV_UDEPOT_SALSA_TRT_URING_MC:
 	{
 		RT::IO::global_init();
 		trt::Controller c;

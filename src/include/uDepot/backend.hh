@@ -16,6 +16,7 @@
 #include "uDepot/io.hh"
 #include "uDepot/io/file-direct.hh"
 #include "uDepot/io/trt-aio.hh"
+#include "uDepot/io/trt-uring.hh"
 #include "uDepot/net/socket.hh"
 #include "uDepot/net/trt-epoll.hh"
 #include "uDepot/net/memcache.hh"
@@ -54,6 +55,15 @@ public:
 	typedef rwlock_pagefault_trt RwpfTy;
 	typedef TrtLock              LockTy;
 	typedef TrtFileIO            IO;
+	typedef TrtSched             Sched;
+	typedef TrtEpollNet          Net;
+};
+
+class RuntimeTrtUring {
+public:
+	typedef rwlock_pagefault_trt RwpfTy;
+	typedef TrtLock              LockTy;
+	typedef TrtFileIOUring       IO;
 	typedef TrtSched             Sched;
 	typedef TrtEpollNet          Net;
 };
@@ -111,6 +121,15 @@ public:
 	typedef rwlock_pagefault_trt RwpfTy;
 	typedef TrtLock              LockTy;
 	typedef TrtFileIO            IO;
+	typedef TrtSched             Sched;
+	typedef MemcacheTrtNet       Net;
+};
+
+class RuntimeTrtUringMC {
+public:
+	typedef rwlock_pagefault_trt RwpfTy;
+	typedef TrtLock              LockTy;
+	typedef TrtFileIOUring       IO;
 	typedef TrtSched             Sched;
 	typedef MemcacheTrtNet       Net;
 };

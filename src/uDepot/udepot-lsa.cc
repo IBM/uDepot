@@ -359,6 +359,15 @@ int uDepotSalsa<RuntimeTrtMC>::init()
 	return init_local(1, 20, 40);
 }
 
+template<>
+__attribute__((warn_unused_result))
+int uDepotSalsa<RuntimeTrtUringMC>::init()
+{
+	// no need for spare, we are not relocating, just purging
+	overprovision_m = 40;	// 1%
+	return init_local(1, 20, 40);
+}
+
 #if defined(UDEPOT_TRT_SPDK)
 template<>
 __attribute__((warn_unused_result))
@@ -1759,6 +1768,8 @@ template class uDepotSalsa<RuntimePosixODirect>;
 template class uDepotSalsa<RuntimeTrt>;
 template class uDepotSalsa<RuntimePosixODirectMC>;
 template class uDepotSalsa<RuntimeTrtMC>;
+template class uDepotSalsa<RuntimeTrtUring>;
+template class uDepotSalsa<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepotSalsa<RuntimePosixSpdk>;
 template class uDepotSalsa<RuntimeTrtSpdk>;

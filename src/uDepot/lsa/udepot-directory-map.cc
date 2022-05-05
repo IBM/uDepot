@@ -861,7 +861,8 @@ uDepotDirectoryMap<RT>::seg_md_callback(const u64 grain_start, const u64 grain_n
 {
 	std::vector<DirMapEntry> *const directory = dir_ref_m.directory;
 	assert(grain_nr == md_m.get_seg_md_size());
-	md_m.persist_seg_md(grain_start, directory->size(), type_m);
+	int rc __attribute__((unused)) = md_m.persist_seg_md(grain_start, directory->size(), type_m);
+	assert(0  == rc);
 }
 
 // instantiate the templates
@@ -870,6 +871,8 @@ template class uDepotDirectoryMap<RuntimePosixODirect>;
 template class uDepotDirectoryMap<RuntimePosixODirectMC>;
 template class uDepotDirectoryMap<RuntimeTrt>;
 template class uDepotDirectoryMap<RuntimeTrtMC>;
+template class uDepotDirectoryMap<RuntimeTrtUring>;
+template class uDepotDirectoryMap<RuntimeTrtUringMC>;
 #if defined(UDEPOT_TRT_SPDK)
 template class uDepotDirectoryMap<RuntimeTrtSpdk>;
 template class uDepotDirectoryMap<RuntimeTrtSpdkArray>;
