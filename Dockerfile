@@ -7,3 +7,6 @@ RUN apt update && apt upgrade -y --no-install-recommends &&\
     apt-get autoremove -y --no-install-recommends &&\
     apt-get clean all &&\
     rm -rf /var/lib/apt/lists/*
+
+RUN git config --global --add safe.directory /udepot/trt/external/dpdk
+RUN git config --global --add safe.directory /udepot/trt/external/spdk
